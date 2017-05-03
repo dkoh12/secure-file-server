@@ -68,8 +68,6 @@ class Client(BaseClient):
 
         resp = self.storage_server.get(dir_ID)
 
-        # print('*** get directory keys ***')
-
         if resp is None:
             keys = self.dir_keys()
             key_info = self.safe_encrypt(keys)
@@ -146,8 +144,6 @@ class Client(BaseClient):
 
     def getRoot(self, ID, sym_ka):
         meta = self.storage_server.get(path_join(ID, str(0)))
-
-        # print("*** GET ROOT ***")
 
         if meta is None:
             return None
@@ -275,8 +271,6 @@ class Client(BaseClient):
     # retrieves stored hash
     def checkTreeNode(self, path, sym_Ka):
         resp = self.storage_server.get(path)
-
-        # print('*** CHECK TREE NODE ***')
 
         if resp is None:
             return None
@@ -411,9 +405,6 @@ class Client(BaseClient):
             if log(numblocks, 2) != int(log(numblocks, 2)):
                 numblocks, blocksize = binaryBlocks(numblocks, value)
 
-            # print("numblocks", numblocks) #8192
-            # print("blocksize", blocksize) #256
-
             # upload tree into server only if newfile or file size changes
             if newFile or (self.getRoot(ID, sym_Ka) != numblocks):
                 datadic = self.hashDataBlocks(ID, numblocks, blocksize, value, sym_Ke, sym_Ka)
@@ -427,7 +418,6 @@ class Client(BaseClient):
                 # root
                 checkentries = deque([1])
                 leaves = []
-                # visitDown = [1]
                 my_hash = {}
 
                 while len(checkentries) != 0:
@@ -443,30 +433,11 @@ class Client(BaseClient):
                             leaves.append(2*p)
                         else:
                             checkentries.append(2*p)
-                        
-                        # visitDown.append(2*p)
 
                         if mmin <= 2*p + 1 <= mmax:
                             leaves.append(2*p+1)
                         else:
                             checkentries.append(2*p + 1)
-                        
-                        # visitDown.append(2*p+1)
-
-
-                # visitUp = []
-                # lohash = {}
-
-                # VISIT UP AND DOWN ARE THE SAME !!!! 
-
-                # print("VISIT DOWN @@@", sorted(visitDown))
-
-                # print()
-                # print("MY HASH", sorted(my_hash.keys()))
-                # print(my_hash)
-                # print()
-                # print(leaves)
-                # print()
 
                 for i in leaves:
                     path = path_join(ID, str(i))
@@ -476,8 +447,6 @@ class Client(BaseClient):
                         path = path_join(ID, 'data', str(i-start_index))
 
                         compare = self.storage_server.get(path)
-                        
-                        # print("*** compare ***")
 
                         if compare is None:
                             return None
@@ -497,19 +466,11 @@ class Client(BaseClient):
                         # updates DATA NODE
                         self.hashData(path, val[i-start_index], sym_Ke, sym_Ka)
 
-                        # print('*** DATA ***')
-
-                        # visitUp.append(i)
-                        # print("I", i)
-                        # lohash[i] = bunch[i]
-
                         # update HASH of DATA NODE
                         path = path_join(ID, str(i))
                         mac = self.crypto.message_authentication_code(bunch[i], sym_Ka, 'SHA') #SHA
                         cipher_info = {"hash": bunch[i], "mac":mac}
                         self.storage_server.put(path, util.to_json_string(cipher_info))
-
-                        # print('*** HASH DATA ***')
 
                         # GET SISTER LEAF HASH
                         if i % 2 == 0:
@@ -533,20 +494,12 @@ class Client(BaseClient):
                             if i %2 == 0:
                                 # get right node
                                 sister = path_join(ID, str(i+1))
-                                # visitUp.append(i+1)
-
                                 stored_hash = my_hash[i+1]
-
-                                # stored_hash = self.checkTreeNode(sister, sym_Ka)
                                 cipher = self.crypto.cryptographic_hash(bunch[i] + stored_hash, 'SHA') #SHA
                             else:
                                 # get left node
                                 sister = path_join(ID, str(i-1))
-                                # visitUp.append(i-1)
-
                                 stored_hash = my_hash[i-1]
-
-                                # stored_hash = self.checkTreeNode(sister, sym_Ka)
                                 cipher = self.crypto.cryptographic_hash(stored_hash + bunch[i], 'SHA') #SHA
 
                             path = path_join(ID, str(i//2))
@@ -554,19 +507,7 @@ class Client(BaseClient):
                             cipher_info = {"hash": cipher, "mac": mac}
                             self.storage_server.put(path, util.to_json_string(cipher_info))
 
-                            # lohash[i] = cipher
-
-                            # visitUp.append(i//2)
-
-                            # print("*** UP TREE ***")
-
                             i = i//2
-
-
-                # print("LLOLOLO hash", sorted(lohash.keys()))
-                # print()
-                # print("VISIT UP @@@", sorted(visitUp))
-                # print()
 
 
     def download(self, name):
@@ -585,8 +526,6 @@ class Client(BaseClient):
         if name not in directory:
             return None
 
-        # directory[name] = {"keys": (keys, session_key), "shared": [], "file_id": self.crypto.get_random_bytes(16)}}
-        
         file = directory[name]
         #owner 
         if len(file["file_id"]) == 32:
@@ -643,7 +582,6 @@ class Client(BaseClient):
                 raise IntegrityError()
 
         return value
-
 
 
 
