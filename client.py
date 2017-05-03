@@ -1,13 +1,3 @@
-"""Secure client implementation
-
-This is a skeleton file for you to build your secure file store client.
-
-Fill in the methods for the class Client per the project specification.
-
-You may add additional functions and classes as desired, as long as your
-Client class conforms to the specification. Be sure to test against the
-included functionality tests.
-"""
 
 from base_client import BaseClient, IntegrityError
 from crypto import CryptoError
